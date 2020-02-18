@@ -51,12 +51,16 @@ class KmerSignatureIndex:
     def insert_bloom(self, bloomfilter, column_index):
         self.bitmatrix.insert_column(bloomfilter, column_index)
 
-    def merge_indexes(self, ksi):
-        for i in range(self.bloomfilter_size):
-            r1 = self.bitmatrix.get_row(i)
-            r2 = ksi.bitmatrix.get_row(i)
-            r1.extend(r2)
-            self.bitmatrix.set_row(i, r1)
+    def merge_indexes(self, ksi, batch_size=10000):
+        for i in range(0, self.bloomfilter_size, batch_size):
+            lower_bound = i
+            upper_bound = min(lower_bound+batch_size, self.bloomfilter_size)
+            indexes = range(lower_bound, upper_bound)
+            rows_from_first_index = list(self.bitmatrix.get_rows(indexes)) # here we need to explicitly convert the generator to list as it is used later
+            rows_from_second_index = ksi.bitmatrix.get_rows(indexes)
+            for r1, r2 in zip(rows_from_first_index, rows_from_second_index):
+                r1.extend(r2)
+            self.bitmatrix.set_rows(indexes, rows_from_first_index)
         self.bitmatrix.set_num_cols(self.bitmatrix.num_cols + ksi.bitmatrix.num_cols)
 
     def __kmers_to_hashes(self, kmers):
