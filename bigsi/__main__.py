@@ -13,7 +13,8 @@ import hug
 import tempfile
 import humanfriendly
 import yaml
-from multiprocessing.pool import ThreadPool
+import copy
+import multiprocessing
 
 from pyfasta import Fasta
 from bigsi.version import __version__
@@ -71,6 +72,14 @@ def search_bigsi(bigsi, seq, threshold, score):
     }
 
 
+def search_bigsi_parallel(l):
+    bigsi = BIGSI(l[0][0])
+    results = []
+    for _, seq, threshold, score in l:
+        results.append(search_bigsi(bigsi, seq, threshold, score))
+    return results
+
+
 API = hug.API("bigsi-%s" % str(__version__))
 
 
@@ -81,8 +90,14 @@ def get_config_from_file(config_file):
         else:
             return DEFAULT_CONFIG
     with open(config_file, "r") as infile:
-        config = yaml.load(infile)
+        config = yaml.load(infile, Loader=yaml.FullLoader)
     return config
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i : i + n]
 
 
 @hug.object(name="bigsi", version="0.1.1", api=API)
@@ -253,20 +268,25 @@ class bigsi(object):
         stream: hug.types.smart_boolean = False,
     ):
         config = get_config_from_file(config)
-        bigsi = BIGSI(config)
+
         fasta = Fasta(fasta)
         if not stream:
+            _config = copy.copy(config)
+            _config["nproc"] = 1
             csv_combined = ""
             nproc = config.get("nproc", 1)
-            with ThreadPool(processes=nproc) as pool:
-                args = [(bigsi, str(seq), threshold, score) for seq in fasta.values()]
-                dd = pool.starmap(search_bigsi, args)
+            with multiprocessing.Pool(processes=nproc) as pool:
+                args = [(_config, str(seq), threshold, score) for seq in fasta.values()]
+                dd = pool.map_async(
+                    search_bigsi_parallel, chunks(args, math.ceil(len(args) / nproc))
+                ).get()
+                dd = [item for sublist in dd for item in sublist]
             if format == "csv":
                 return "\n".join([d_to_csv(d, False, False) for d in dd])
             else:
                 return json.dumps(dd, indent=4)
         else:
-            dd = []
+            bigsi = BIGSI(config)
             csv_combined = ""
             for i, seq in enumerate(fasta.values()):
                 seq = str(seq)
@@ -276,7 +296,6 @@ class bigsi(object):
                     "results": bigsi.search(seq, threshold, score),
                     "citation": "http://dx.doi.org/10.1038/s41587-018-0010-1",
                 }
-                dd.append(d)
                 if format == "csv":
                     if i == 0:
                         with_header = True
