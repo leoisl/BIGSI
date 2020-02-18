@@ -52,11 +52,16 @@ class KmerSignatureIndex:
         self.bitmatrix.insert_column(bloomfilter, column_index)
 
     def merge_indexes(self, ksi):
-        for i in range(self.bloomfilter_size):
-            r1 = self.bitmatrix.get_row(i)
-            r2 = ksi.bitmatrix.get_row(i)
-            r1.extend(r2)
-            self.bitmatrix.set_row(i, r1)
+        for key_1, key_2 in zip(self.storage.storage.keys(), ksi.storage.storage.keys()):
+            assert key_1 == key_2
+
+            if key_1.endswith(b':bitarray'):
+                key_1 = int(key_1[:-9])
+                key_2 = int(key_2[:-9])
+                r1 = self.bitmatrix.get_row(key_1)
+                r2 = ksi.bitmatrix.get_row(key_2)
+                r1.extend(r2)
+                self.bitmatrix.set_row(key_1, r1)
         self.bitmatrix.set_num_cols(self.bitmatrix.num_cols + ksi.bitmatrix.num_cols)
 
     def __kmers_to_hashes(self, kmers):
