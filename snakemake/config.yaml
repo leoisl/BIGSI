@@ -11,7 +11,7 @@ output_dir: bigsi_search_out
 threshold: 1.0
 
 # singularity img with bigsi to be called
-singularity_img: /home/leandro/git/ebi-glue/BIGSI_FULL/containers/docker/sing_image/leandroishilima_bigsi_pipeline_deps_adding_search_several-2020-02-19-d6fc272e9a64.simg
+singularity_img: /home/leandro/git/ebi-glue/BIGSI_FULL/containers/docker/sing_image/leandroishilima_bigsi_pipeline_deps_adding_search_several-2020-02-19-670df77e7c76.simg
 
 # cache for each bigsi index (increasing cache can speed up searching, but the job takes longer to be scheduled)
 cache_mem_gb: 2
