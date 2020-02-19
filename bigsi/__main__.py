@@ -71,6 +71,14 @@ def search_bigsi(bigsi, seq, threshold, score):
         "citation": "http://dx.doi.org/10.1038/s41587-018-0010-1",
     }
 
+def search_on_several_bigsis(bigsis, seq, threshold, score):
+    return {
+        "query": seq,
+        "threshold": threshold,
+        "results": BIGSI.search_on_several_bigsis(bigsis, seq, threshold, score),
+        "citation": "http://dx.doi.org/10.1038/s41587-018-0010-1",
+    }
+
 
 def search_bigsi_parallel(l):
     bigsi = BIGSI(l[0][0])
@@ -207,6 +215,49 @@ class bigsi(object):
             return d_to_csv(d)
         else:
             return json.dumps(d, indent=4)
+
+
+    @hug.object.cli
+    @hug.object.post(
+        "/search_several",
+        response_headers={"Access-Control-Allow-Origin": "*"},
+        output=hug.output_format.text,
+    )
+    @hug.object.get(
+        "/search_several",
+        examples="seq=ACACAAACCATGGCCGGACGCAGCTTTCTGA",
+        response_headers={"Access-Control-Allow-Origin": "*"},
+        output=hug.output_format.text,
+    )
+    def search_several(
+        self,
+        seq: hug.types.text,
+        threshold: hug.types.float_number = 1.0,
+        configs_file: hug.types.text = None,
+        score: hug.types.smart_boolean = False,
+        format: hug.types.one_of(["json", "csv"]) = "json",
+        total_cache_size_in_MB: hug.types.float_number = 10.0
+    ):
+        # read configs
+        with open(configs_file) as configs_filehandler:
+            configs = configs_filehandler.readlines()
+        configs = [config.strip() for config in configs if len(config.strip()) > 0]
+        configs = [get_config_from_file(config) for config in configs]
+
+        # forcibly change cache size #TODO: this just works on berkeleydb, does it work on others?
+        total_cache_size_in_bytes = total_cache_size_in_MB * 1024 * 1024
+        cache_size_per_bigsi = int(total_cache_size_in_bytes / len(configs))
+        for config in configs:
+            config['storage-config']['hashsize'] = cache_size_per_bigsi
+
+        bigsis = [BIGSI(config) for config in configs]
+        d = search_on_several_bigsis(bigsis, seq, threshold, score)
+        if format == "csv":
+            return d_to_csv(d)
+        else:
+            return json.dumps(d, indent=4)
+
+
 
     @hug.object.cli
     @hug.object.post(

@@ -189,6 +189,15 @@ class BIGSI(SampleMetadata, KmerSignatureIndex):
             if not r.sample_name == DELETION_SPECIAL_SAMPLE_NAME
         ]
 
+    @staticmethod
+    def search_on_several_bigsis(bigsis, seq, threshold=1.0, score=False):
+        results = []
+        for bigsi in bigsis:
+            result = bigsi.search(seq, threshold, score)
+            results.extend(result)
+        return results
+
+
     def exact_filter(self, kmers_to_colours):
         colours_with_all_kmers = non_zero_bitarrary_positions(
             bitwise_and(kmers_to_colours.values())
