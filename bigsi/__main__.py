@@ -236,7 +236,7 @@ class bigsi(object):
         configs_file: hug.types.text = None,
         score: hug.types.smart_boolean = False,
         format: hug.types.one_of(["json", "csv"]) = "json",
-        total_cache_size_in_MB: hug.types.float_number = 10.0
+        total_cache_size_in_GB: hug.types.float_number = 10.0
     ):
         # read configs
         with open(configs_file) as configs_filehandler:
@@ -245,7 +245,7 @@ class bigsi(object):
         configs = [get_config_from_file(config) for config in configs]
 
         # forcibly change cache size #TODO: this just works on berkeleydb, does it work on others?
-        total_cache_size_in_bytes = total_cache_size_in_MB * 1024 * 1024
+        total_cache_size_in_bytes = total_cache_size_in_GB * 1024 * 1024 * 1024
         cache_size_per_bigsi = int(total_cache_size_in_bytes / len(configs))
         for config in configs:
             config['storage-config']['hashsize'] = cache_size_per_bigsi
