@@ -317,8 +317,13 @@ class bigsi(object):
         score: hug.types.smart_boolean = False,
         format: hug.types.one_of(["json", "csv"]) = "json",
         stream: hug.types.smart_boolean = False,
+        total_cache_size_in_GB: hug.types.float_number = 2.0
     ):
         config = get_config_from_file(config)
+
+        # forcibly change cache size #TODO: this just works on berkeleydb, does it work on others?
+        total_cache_size_in_bytes = total_cache_size_in_GB * 1024 * 1024 * 1024
+        config['storage-config']['hashsize'] = int(total_cache_size_in_bytes)
 
         fasta = Fasta(fasta)
         if not stream:

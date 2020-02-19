@@ -1,0 +1,17 @@
+# text file with all the bigsi indexes (use absolute paths)
+indexes: /home/leandro/git/BIGSI/snakemake/index.txt
+
+# fasta file with sequences to be searched in the indexes
+fasta: /home/leandro/git/BIGSI/snakemake/fasta.txt
+
+# where to put results (final results will be in a file "result.json" in this dir)
+output_dir: bigsi_search_out
+
+# bigsi kmer presence threshold
+threshold: 1.0
+
+# singularity img with bigsi to be called
+singularity_img: /home/leandro/git/ebi-glue/BIGSI_FULL/containers/docker/sing_image/leandroishilima_bigsi_pipeline_deps_adding_search_several-2020-02-19-d6fc272e9a64.simg
+
+# cache for each bigsi index (increasing cache can speed up searching, but the job takes longer to be scheduled)
+cache_mem_gb: 2

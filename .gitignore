@@ -73,3 +73,7 @@ test_dbmetadata
 test_dbsample_to_colour_lookup
 
 \.idea/
+
+snakemake/\.snakemake/
+
+snakemake/logs/
