@@ -77,3 +77,7 @@ test_dbsample_to_colour_lookup
 snakemake/\.snakemake/
 
 snakemake/logs/
+
+snakemake/fasta\.txt\.flat
+
+snakemake/fasta\.txt\.gdx
