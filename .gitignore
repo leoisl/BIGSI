@@ -81,3 +81,5 @@ snakemake/logs/
 snakemake/fasta\.txt\.flat
 
 snakemake/fasta\.txt\.gdx
+
+containers/docker/sing_image/
