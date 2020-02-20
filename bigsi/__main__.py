@@ -249,6 +249,7 @@ class bigsi(object):
         cache_size_per_bigsi = int(total_cache_size_in_bytes / len(configs))
         for config in configs:
             config['storage-config']['hashsize'] = cache_size_per_bigsi
+            config['storage-config']['flag'] = 'r'  # TODO: add this to other searches
 
         bigsis = [BIGSI(config) for config in configs]
         d = search_on_several_bigsis(bigsis, seq, threshold, score)
@@ -324,6 +325,9 @@ class bigsi(object):
         # forcibly change cache size #TODO: this just works on berkeleydb, does it work on others?
         total_cache_size_in_bytes = total_cache_size_in_GB * 1024 * 1024 * 1024
         config['storage-config']['hashsize'] = int(total_cache_size_in_bytes)
+
+        # and says the DBs must be read only
+        config['storage-config']['flag'] = 'r' # TODO: add this to other searches
 
         fasta = Fasta(fasta)
         if not stream:
