@@ -48,8 +48,6 @@ rule concatenate_jsons_of_all_indexes:
     log: "logs/concatenate_jsons_of_all_indexes.log"
     resources:
         mem_mb = lambda wildcards, attempt: 10000 * attempt
-    singularity:
-        singularity_img
     script:
         "scripts/concatenate_jsons_of_all_indexes.py"
 
@@ -63,14 +61,12 @@ rule bulk_search_fasta_in_an_index:
     threads:
         1
     params:
-        threshold = threshold,
-        cache_mem_gb = cache_mem_gb
+    	threshold = threshold,
+        cache_mem_gb = cache_mem_gb,
+        singularity_img = singularity_img
     log:
         "logs/bulk_search_fasta_in_an_index.{i}.log"
     resources:
         mem_mb = lambda wildcards, attempt: int(cache_mem_gb*1024 * 1.3) * attempt
-    singularity:
-        singularity_img
     shell:
-        "bigsi bulk_search -t {params.threshold} -c {input.index} -to {params.cache_mem_gb} {input.fasta} > {output.intermediate_json_output}"
-
+    	"singularity exec {params.singularity_img} bigsi bulk_search -t {params.threshold} -c {input.index} -to {params.cache_mem_gb} {input.fasta} > {output.intermediate_json_output}"
