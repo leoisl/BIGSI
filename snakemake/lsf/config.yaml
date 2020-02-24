@@ -1,6 +1,6 @@
 latency-wait: "10"
 jobscript: "lsf-jobscript.sh"
-use-conda: "True"
+use-conda: "False"
 use-singularity: "True"
 printshellcmds: "True"
 restart-times: "3"
