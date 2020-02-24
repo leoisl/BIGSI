@@ -2,7 +2,7 @@
 JOB_NAME="snakemake_master_process."$(date --iso-8601='minutes')
 LOG_DIR=logs/
 MEMORY=8000
-PROFILE="lsf"
+PROFILE="./lsf/"
 
 mkdir -p $LOG_DIR
 
